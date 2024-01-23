@@ -5,9 +5,9 @@ defaults:
   - _self_
 
 datasets:
- - test.h5
+ - new_format_susy.h5
 
 # The name of the model to export
 network_name: example_model
-project_name: models
+project_name: nu2flows_models
 batch_size: 512

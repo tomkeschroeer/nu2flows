@@ -1,5 +1,5 @@
 # output dir will be created by hydra
-data_dir: /home/users/l/leighm/scratch/Data/nu2flows
+data_dir: /home/users/s/schroeer/scratch/PhD/NuFlows/data
 output_dir: ${oc.env:PROJECT_ROOT}
 
 # Interpolated

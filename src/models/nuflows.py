@@ -33,7 +33,7 @@ class NuFlowBase(pl.LightningModule):
         self.do_bayesian = False
 
         # Split the input dimension into its component parts
-        self.misc_dim, self.met_dim, self.lep_dim, self.jet_dim, self.nu_dim = data_dims
+        self.misc_dim, self.met_dim, self.jet_dim, self.nu_dim = data_dims
 
         # The misc and met dimensions need to be converted to intergers
         self.misc_dim = self.misc_dim[0]
@@ -41,16 +41,16 @@ class NuFlowBase(pl.LightningModule):
 
         # The number of leptons, jets and neutrinos used in this model
         self.n_nu = self.nu_dim[0]
-        self.n_lep = self.lep_dim[0]
+        # self.n_lep = self.lep_dim[0]
         self.n_jets = self.jet_dim[0]
         self.nu_features = self.nu_dim[-1]
-        self.lep_features = self.lep_dim[-1]
+        # self.lep_features = self.lep_dim[-1]
         self.jet_features = self.jet_dim[-1]
 
         # Initialise the individual normalisation layers
         self.misc_normaliser = IterativeNormLayer(self.misc_dim)
         self.met_normaliser = IterativeNormLayer(self.met_dim)
-        self.lep_normaliser = IterativeNormLayer(self.lep_dim, extra_dims=0)
+        # self.lep_normaliser = IterativeNormLayer(self.lep_dim, extra_dims=0)
         self.jet_normaliser = IterativeNormLayer(self.jet_dim[-1])  # Will be masked
         self.nu_normaliser = IterativeNormLayer(self.nu_dim, extra_dims=0)
 
@@ -67,7 +67,7 @@ class NuFlowBase(pl.LightningModule):
             wandb.define_metric("valid/total_loss", summary="min")
 
     def get_flow_ctxt(
-        self, misc: T.Tensor, met: T.Tensor, lep: T.Tensor, jet: T.Tensor
+        self, misc: T.Tensor, met: T.Tensor, jet: T.Tensor
     ) -> tuple:
         raise NotImplementedError
 
@@ -75,8 +75,8 @@ class NuFlowBase(pl.LightningModule):
         """Combination of the get_flow_tensors and log_prob methods to allow
         the forward hooks used by other packages to be activated during
         training."""
-        misc, met, lep, jet, nu = sample
-        ctxt = self.get_flow_ctxt(misc, met, lep, jet)
+        misc, met, jet, nu = sample
+        ctxt = self.get_flow_ctxt(misc, met, jet)
         nu = self.nu_normaliser(nu).view(len(nu), -1)
         log_lik = self.flow.log_prob(nu, context=ctxt).mean()
         prior = prior_loss(self) if self.do_bayesian else T.zeros_like(log_lik)
@@ -99,8 +99,8 @@ class NuFlowBase(pl.LightningModule):
 
     def predict_step(self, batch: tuple, _batch_idx: int) -> None:
         """Single prediction step which add generates samples to the buffer."""
-        misc, met, lep, jet, _ = batch
-        gen_nu, log_prob = self.sample_and_log_prob((misc, met, lep, jet))
+        misc, met, jet, _ = batch
+        gen_nu, log_prob = self.sample_and_log_prob((misc, met, jet))
         return {"gen_nu": gen_nu, "log_prob": log_prob}
 
     def generate(self, inputs: tuple, n_points: int = 256) -> T.Tensor:
@@ -133,8 +133,8 @@ class NuFlowBase(pl.LightningModule):
     def get_latents(self, batch: tuple) -> T.Tensor:
         """Get the latent space embeddings given neutrino and context
         information."""
-        misc, met, lep, jet, nu = batch
-        ctxt = self.get_flow_ctxt(misc, met, lep, jet)
+        misc, met, jet, nu = batch
+        ctxt = self.get_flow_ctxt(misc, met, jet)
         nu = self.nu_normaliser(nu).view(len(nu), -1)
         return self.flow.transform_to_noise(nu, context=ctxt)
 
@@ -191,7 +191,7 @@ class NeutrinoFlow(NuFlowBase):
         # Initialise the deep set
         self.jet_deepset = DeepSet(
             inpt_dim=self.jet_dim[-1],
-            ctxt_dim=self.misc_dim + self.met_dim + self.n_lep * self.lep_features,
+            ctxt_dim=self.misc_dim + self.met_dim,
             **deepset_conf,
         )
 
@@ -199,7 +199,6 @@ class NeutrinoFlow(NuFlowBase):
         self.embed_net = DenseNetwork(
             inpt_dim=self.misc_dim
             + self.met_dim
-            + self.n_lep * self.lep_features
             + self.jet_deepset.outp_dim,
             **embed_conf,
         )
@@ -218,7 +217,7 @@ class NeutrinoFlow(NuFlowBase):
         self.do_bayesian = contains_bayesian_layers(self)
 
     def get_flow_ctxt(
-        self, misc: T.Tensor, met: T.Tensor, lep: T.Tensor, jet: T.Tensor
+        self, misc: T.Tensor, met: T.Tensor, jet: T.Tensor
     ) -> tuple:
         """Gets the context tensor for the flow using the FF components of the
         net."""
@@ -229,21 +228,21 @@ class NeutrinoFlow(NuFlowBase):
         # Pass the inputs through the normalisation layers
         misc = self.misc_normaliser(misc)
         met = self.met_normaliser(met)
-        lep = self.lep_normaliser(lep)
+        # lep = self.lep_normaliser(lep)
         jet = self.jet_normaliser(jet, jet_mask)
 
         # Flatten the lep tensor
-        lep = lep.view(len(lep), -1)
+        # lep = lep.view(len(lep), -1)
 
         # Pass the jet tensor through the deep set
         jet = self.jet_deepset(
             inpt=jet,
             mask=jet_mask,
-            ctxt=T.cat([misc, met, lep], dim=-1),
+            ctxt=T.cat([misc, met], dim=-1),
         )
 
         # Combine all inputs and pass through the embedding network
-        return self.embed_net(T.cat([misc, met, lep, jet], dim=-1))
+        return self.embed_net(T.cat([misc, met, jet], dim=-1))
 
 
 class TransNeutrinoFlow(NuFlowBase):
@@ -285,11 +284,11 @@ class TransNeutrinoFlow(NuFlowBase):
             outp_dim=self.transformer.model_dim,
             **part_embed_conf,
         )
-        self.lep_embedder = DenseNetwork(
-            inpt_dim=self.lep_dim[-1],
-            outp_dim=self.transformer.model_dim,
-            **part_embed_conf,
-        )
+        # self.lep_embedder = DenseNetwork(
+        #     inpt_dim=self.lep_dim[-1],
+        #     outp_dim=self.transformer.model_dim,
+        #     **part_embed_conf,
+        # )
         self.jet_embedder = DenseNetwork(
             inpt_dim=self.jet_dim[-1],
             outp_dim=self.transformer.model_dim,
@@ -316,7 +315,7 @@ class TransNeutrinoFlow(NuFlowBase):
         self.do_bayesian = contains_bayesian_layers(self)
 
     def get_flow_ctxt(
-        self, misc: T.Tensor, met: T.Tensor, lep: T.Tensor, jet: T.Tensor
+        self, misc: T.Tensor, met: T.Tensor, jet: T.Tensor
     ) -> tuple:
         """Gets the context tensor for the flow using the FF components of the
         net."""
@@ -327,21 +326,21 @@ class TransNeutrinoFlow(NuFlowBase):
         # Pass the inputs through the normalisation layers
         misc = self.misc_normaliser(misc)
         met = self.met_normaliser(met)
-        lep = self.lep_normaliser(lep)
+        # lep = self.lep_normaliser(lep)
         jet = self.jet_normaliser(jet, jet_mask)
 
         # Pass each of the particles through the embedding networks
         met = self.met_embedder(met)
-        lep = self.lep_embedder(lep)
+        # lep = self.lep_embedder(lep)
         jet = self.jet_embedder(jet)
 
         # Combine them all into a single tensor
-        combined = T.concat([met.unsqueeze(1), lep, jet], dim=1)
+        combined = T.concat([met.unsqueeze(1), jet], dim=1)
 
         # Get a mask for all the elements
         mask = T.concat(
             [
-                T.full((len(met), 1 + self.n_lep), True, device=self.device),
+                T.full((len(met), 1), True, device=self.device),
                 jet_mask,
             ],
             dim=-1,

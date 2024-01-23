@@ -615,6 +615,7 @@ class IterativeNormLayer(nn.Module):
     ) -> None:
         """Set the stats given a population of data."""
         inpt = self._mask(inpt, mask)
+        print(f"dim={(0, *self.extra_dims)}")
         self.vars, self.means = T.var_mean(
             inpt,
             dim=(0, *self.extra_dims),
@@ -635,6 +636,8 @@ class IterativeNormLayer(nn.Module):
 
         # Mask the inputs and update the stats
         sel_inpt = self._mask(inpt, mask)
+        print(f"sel inpt = {sel_inpt.shape}")
+        print(f"sel means = {self.means.shape}")
         if not self.frozen and self.training:
             self.update(sel_inpt)
 
