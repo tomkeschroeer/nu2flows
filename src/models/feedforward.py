@@ -4,6 +4,7 @@ from typing import Mapping
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
+from numpy import nan
 import wandb
 
 from utils.bayesian import contains_bayesian_layers
@@ -89,11 +90,12 @@ class TransFeedForward(NuFlowBase):
 
         # Make a mask for the input jets based on zero padding
         jet_mask = T.any(jet != 0, dim=-1)
+        lep_mask = T.any(lep != 0, dim=-1)
 
         # Pass the inputs through the normalisation layers
         misc = self.misc_normaliser(misc)
         met = self.met_normaliser(met)
-        lep = self.lep_normaliser(lep)
+        lep = self.lep_normaliser(lep, lep_mask)
         jet = self.jet_normaliser(jet, jet_mask)
 
         # Pass each of the particles through the embedding networks
@@ -107,7 +109,8 @@ class TransFeedForward(NuFlowBase):
         # Get a mask for all the elements
         mask = T.concat(
             [
-                T.full((len(met), 1 + self.n_lep), True, device=self.device),
+                T.full((len(met),1), True, device=self.device),
+                lep_mask,
                 jet_mask,
             ],
             dim=-1,

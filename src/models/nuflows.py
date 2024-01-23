@@ -41,7 +41,9 @@ class NuFlowBase(pl.LightningModule):
 
         # The number of leptons, jets and neutrinos used in this model
         self.n_nu = self.nu_dim[0]
+        print(f"nu dim = {self.nu_dim}")
         self.n_lep = self.lep_dim[0]
+        print(f"n leps = {self.n_lep}")
         self.n_jets = self.jet_dim[0]
         self.nu_features = self.nu_dim[-1]
         self.lep_features = self.lep_dim[-1]
@@ -50,7 +52,7 @@ class NuFlowBase(pl.LightningModule):
         # Initialise the individual normalisation layers
         self.misc_normaliser = IterativeNormLayer(self.misc_dim)
         self.met_normaliser = IterativeNormLayer(self.met_dim)
-        self.lep_normaliser = IterativeNormLayer(self.lep_dim, extra_dims=0)
+        self.lep_normaliser = IterativeNormLayer(self.lep_dim[-1])
         self.jet_normaliser = IterativeNormLayer(self.jet_dim[-1])  # Will be masked
         self.nu_normaliser = IterativeNormLayer(self.nu_dim, extra_dims=0)
 
@@ -225,11 +227,12 @@ class NeutrinoFlow(NuFlowBase):
 
         # Make a mask for the input jets based on zero padding
         jet_mask = T.any(jet != 0, dim=-1)
+        lep_mask = T.any(lep != 0, dim=-1)
 
         # Pass the inputs through the normalisation layers
         misc = self.misc_normaliser(misc)
         met = self.met_normaliser(met)
-        lep = self.lep_normaliser(lep)
+        lep = self.lep_normaliser(lep, lep_mask)
         jet = self.jet_normaliser(jet, jet_mask)
 
         # Flatten the lep tensor
@@ -323,11 +326,12 @@ class TransNeutrinoFlow(NuFlowBase):
 
         # Make a mask for the input jets based on zero padding
         jet_mask = T.any(jet != 0, dim=-1)
+        lep_mask = T.any(lep != 0, dim=-1)
 
         # Pass the inputs through the normalisation layers
         misc = self.misc_normaliser(misc)
         met = self.met_normaliser(met)
-        lep = self.lep_normaliser(lep)
+        lep = self.lep_normaliser(lep, lep_mask)
         jet = self.jet_normaliser(jet, jet_mask)
 
         # Pass each of the particles through the embedding networks
@@ -341,7 +345,8 @@ class TransNeutrinoFlow(NuFlowBase):
         # Get a mask for all the elements
         mask = T.concat(
             [
-                T.full((len(met), 1 + self.n_lep), True, device=self.device),
+                T.full((len(met), 1), True, device=self.device),
+                lep_mask,
                 jet_mask,
             ],
             dim=-1,

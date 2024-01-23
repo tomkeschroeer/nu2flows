@@ -93,6 +93,7 @@ class H5Dataset(Dataset):
 
         # Jets need to be padded so create a mask
         self.jet_mask = ~np.all(self.jet == 0, axis=-1)
+        self.lep_mask = ~np.all(self.lep == 0, axis=-1)
 
         # Neutrinos are always ordered particle -> antiparticle, so drop pdgid
         self.nu = self.nu[..., [1, 2, 3]]
@@ -120,6 +121,7 @@ class H5Dataset(Dataset):
 
         # Ensure zero padding of the jets post transformation
         self.jet[~self.jet_mask] = 0
+        self.lep[~self.lep_mask] = 0
 
     def plot_variables(self, path: str = "plots") -> None:
         """Plot some histograms showing the dataset distributions."""
@@ -212,13 +214,22 @@ class H5DataModule(pl.LightningDataModule):
         return self.miniset.get_dims()
 
     def train_dataloader(self) -> DataLoader:
+        print("train dataloader")
+        print(f"self.hparams_loader conf = {self.hparams.loader_conf}")
+        print(f"self.hparams = {self.hparams}")
         return DataLoader(self.train_set, **self.hparams.loader_conf, shuffle=True)
 
     def val_dataloader(self) -> DataLoader:
+        print("val dataloader")
+        print(f"self.hparams_loader conf = {self.hparams.loader_conf}")
+        print(f"self.hparams = {self.hparams}")
         return DataLoader(self.valid_set, **self.hparams.loader_conf, shuffle=False)
 
     def test_dataloader(self) -> DataLoader:
         self.hparams.loader_conf["drop_last"] = False
+        print("test dataloader")
+        print(f"self.hparams_loader conf = {self.hparams.loader_conf}")
+        print(f"self.hparams = {self.hparams}")
         return DataLoader(self.test_set, **self.hparams.loader_conf, shuffle=False)
 
     def predict_dataloader(self) -> DataLoader:

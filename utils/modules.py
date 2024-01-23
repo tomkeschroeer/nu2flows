@@ -591,6 +591,10 @@ class IterativeNormLayer(nn.Module):
         # Gradient tracking options
         self.track_grad_forward = track_grad_forward
         self.track_grad_reverse = track_grad_reverse
+        print(f"self means = {self.means}")
+        print(f"self vars = {self.vars}")
+        print(f"self n = {self.n}")
+        print(f"self m2 = {self.m2}")
 
     def __repr__(self):
         return f"IterativeNormLayer({list(self.means.shape)})"
@@ -624,6 +628,10 @@ class IterativeNormLayer(nn.Module):
         self.n = T.tensor(len(inpt), device=self.means.device)
         self.m2 = self.vars * self.n
         self.frozen.fill_(True)
+        print(f"self vars = {self.vars}")
+        print(f"self means = {self.means}")
+        print(f"self n = {self.n}")
+        print(f"self m2 = {self.m2}")
 
     def forward(self, inpt: T.Tensor, mask: Optional[T.BoolTensor] = None) -> T.Tensor:
         """Applies the standardisation to a batch of inputs, also uses the

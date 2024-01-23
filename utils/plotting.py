@@ -676,6 +676,7 @@ def plot_multi_hists_2(
     for data_idx in range(len(data_list)):
         if data_list[data_idx].ndim < 2:
             data_list[data_idx] = data_list[data_idx].unsqueeze(-1)
+        # data_list[data_idx] = data_list[data_idx][~np.any(np.isnan(data_list[data_idx]), axis=1)]
 
     # Check the number of histograms to plot
     n_data = len(data_list)

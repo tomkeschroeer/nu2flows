@@ -23,6 +23,7 @@ log = logging.getLogger(__name__)
 def main(cfg: DictConfig) -> None:
     log.info("Loading run information")
     orig_cfg = reload_original_config(cfg, get_best=True)
+    print(orig_cfg)
 
     log.info("Loading best checkpoint")
     model_class = hydra.utils.get_class(orig_cfg.model._target_)

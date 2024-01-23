@@ -16,8 +16,8 @@ from src.datamodules.physics import Mom4Vec
 from src.utils import read_dilepton_file
 
 # Paths to the relevant files
-data_file = "/home/users/l/leighm/scratch/Data/nu2flows/test.h5"
-model_file = root / "nu2flows_models/example_model/outputs/test.h5"
+data_file = "/home/users/s/schroeer/scratch/PhD/NuFlows/data/mydata_ttH_two.h5"
+model_file = root / "nu2flows_models/example_model/outputs/mydata_ttH_two.h5"
 plot_dir = root / "plots"
 
 # Load the event data from the file
@@ -67,26 +67,26 @@ plot_multi_hists_2(
 )
 
 # Pull out the anti-lepton from the file data
-lep = file_data.leptons[:, 1:2]
+# lep = file_data.leptons[:, 1:2]
 
-# Pull out the corresponding b jet, create a 4 vector object
-b_loc = file_data.jets_indices == 0
-bjet = np.zeros((len(file_data.jets_indices), 1, 4))
-bjet[np.any(b_loc, axis=-1)] = file_data.jets[b_loc].mom[:, None]
-bjet = Mom4Vec(bjet)
+# # Pull out the corresponding b jet, create a 4 vector object
+# b_loc = file_data.jets_indices == 0
+# bjet = np.zeros((len(file_data.jets_indices), 1, 4))
+# bjet[np.any(b_loc, axis=-1)] = file_data.jets[b_loc].mom[:, None]
+# bjet = Mom4Vec(bjet)
 
-# For each neutrino definition in the list, create a top candidate from the triplet
-for n in neutrino_list:
-    n.top = n.nu + lep + bjet
+# # For each neutrino definition in the list, create a top candidate from the triplet
+# for n in neutrino_list:
+#     n.top = n.nu + lep + bjet
 
-# Plot the top mass
-plot_multi_hists_2(
-    data_list=[n.top.mass[file_data.has_both_bs] for n in neutrino_list],
-    data_labels=[n.label for n in neutrino_list],
-    col_labels="Top mass [GeV]",
-    path=plot_dir / "mass.png",
-    bins=np.linspace(0, 400, 100),
-    do_err=True,
-    hist_kwargs=[n.hist_kwargs for n in neutrino_list],
-    err_kwargs=[n.err_kwargs for n in neutrino_list],
-)
+# # Plot the top mass
+# plot_multi_hists_2(
+#     data_list=[n.top.mass[file_data.has_both_bs] for n in neutrino_list],
+#     data_labels=[n.label for n in neutrino_list],
+#     col_labels="Top mass [GeV]",
+#     path=plot_dir / "mass.png",
+#     bins=np.linspace(0, 400, 100),
+#     do_err=True,
+#     hist_kwargs=[n.hist_kwargs for n in neutrino_list],
+#     err_kwargs=[n.err_kwargs for n in neutrino_list],
+# )

@@ -51,11 +51,10 @@ def read_dilepton_file(file_path: Path, require_tops: bool = False) -> DotMap:
     )
     file_data.lep_jet = lep_jet
     file_data.antilep_jet = antilep_jet
-
     # Count the number of b quarks matched to the jets in the data
-    has_b = (file_data.jets_indices == 0).sum(axis=-1).astype("bool")
-    has_bbar = (file_data.jets_indices == 1).sum(axis=-1).astype("bool")
-    file_data.has_both_bs = has_b & has_bbar
+    # has_b = (file_data.jets_indices == 0).sum(axis=-1).astype("bool")
+    # has_bbar = (file_data.jets_indices == 1).sum(axis=-1).astype("bool")
+    # file_data.has_both_bs = has_b & has_bbar
 
     # Count the number of btagged jets
     file_data.at_least_two_bjets = file_data.jets.oth.sum(axis=(-1, -2)) >= 2

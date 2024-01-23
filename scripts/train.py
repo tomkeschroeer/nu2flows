@@ -41,6 +41,7 @@ def main(cfg: DictConfig) -> None:
     datamodule = hydra.utils.instantiate(cfg.datamodule)
 
     log.info("Instantiating the model")
+    print(cfg.model)
     model = hydra.utils.instantiate(cfg.model, data_dims=datamodule.get_dims())
 
     log.info("Instantiating all callbacks")
