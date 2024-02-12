@@ -10,4 +10,4 @@ datasets:
 # The name of the model to export
 network_name: example_model
 project_name: nu2flows_models
-batch_size: 512
+batch_size: 1024

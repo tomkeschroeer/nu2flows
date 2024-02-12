@@ -1,0 +1,48 @@
+_target_: src.models.nuflows.NuFlows
+
+embed_config:
+  hddn_dim: 256
+  num_blocks: 1
+
+transformer_config:
+  dim: 128
+  encoder_config:
+    num_layers: 4
+    layer_config:
+      num_heads: 8
+      do_self_attn: True
+  classattention_config:
+    num_layers: 2
+    layer_config:
+      num_heads: 8
+
+flow_config:
+  num_stacks: 8
+  mlp_width: 128
+  mlp_depth: 1
+  mlp_act: silu
+  tail_bound: 4.0
+  dropout: 0
+  num_bins: 8
+  flow_type: coupling
+  do_lu: True # Waiting on normflows to approve PR otherwise it wont work with onnx
+  init_identity: True
+
+# Full configuration for the model optimizer
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  lr: 1.0e-3
+  weight_decay: 1.0e-3
+
+# Config dicts to pass to utils and pytorch lightning
+sched_config:
+  mltools:
+    # name: warmup
+    name: cyclicwithwarmup
+    epochs_per_cycle: 30
+
+  lightning:
+    monitor: valid/total_loss
+    interval: step
+    frequency: 1
