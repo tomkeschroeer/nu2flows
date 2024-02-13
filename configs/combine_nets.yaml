@@ -1,0 +1,21 @@
+# Allows hydra to open up in the original folder of the run
+defaults:
+  - paths: default.yaml
+  - hydra: default.yaml
+  - _self_
+
+configs:
+  - "export_one.yaml"
+  - "export_two.yaml"
+  - "export_three.yaml"
+  - "export_four.yaml"
+
+network_name: ""
+project_name: nu2flows_models
+batch_size: 10 #512
+
+datasets:
+ - ttH_one_test.h5
+ - ttH_two_test.h5
+ - ttH_three_test.h5
+ - ttH_four_test.h5

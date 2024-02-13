@@ -5,3 +5,4 @@ output_dir: ${oc.env:PROJECT_ROOT}
 # Interpolated
 root_dir: ${oc.env:PROJECT_ROOT}
 full_path: ${paths.output_dir}/${project_name}/${network_name}/
+project_path: ${paths.root_dir}/${project_name}

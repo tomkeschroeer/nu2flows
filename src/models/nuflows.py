@@ -15,6 +15,7 @@ from utils.transformers import (
     TransformerVectorEncoder,
 )
 
+from src.models.combined_model import CombinedModel
 
 class NuFlowBase(pl.LightningModule):
     """Base class for the neutrino flows."""
@@ -41,9 +42,7 @@ class NuFlowBase(pl.LightningModule):
 
         # The number of leptons, jets and neutrinos used in this model
         self.n_nu = self.nu_dim[0]
-        print(f"nu dim = {self.nu_dim}")
         self.n_lep = self.lep_dim[0]
-        print(f"n leps = {self.n_lep}")
         self.n_jets = self.jet_dim[0]
         self.nu_features = self.nu_dim[-1]
         self.lep_features = self.lep_dim[-1]
