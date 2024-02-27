@@ -20,7 +20,7 @@ test_conf:
 
 loader_conf:
   pin_memory: True
-  batch_size: 512
+  batch_size: 10 #512
   num_workers: 2
 
 val_frac: 0.1

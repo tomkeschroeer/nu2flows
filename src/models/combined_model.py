@@ -10,12 +10,12 @@ class CombinedModel(pl.LightningModule):
     def predict_step(self, batch: tuple, _batch_idx: int) -> None:
         """Single prediction step which add generates samples to the buffer."""
         misc, met, lep, jet, _ = batch
-        print(lep.shape)
-        print(lep[0])
-        print(lep[1])
-        print(lep[2])
-        print(lep[3])
-        print(lep[4])
+        # print(lep.shape)
+        # print(lep[0])
+        # print(lep[1])
+        # print(lep[2])
+        # print(lep[3])
+        # print(lep[4])
         gen_nus = {}
         log_probs = {}
         for length in range(1, 5):

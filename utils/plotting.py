@@ -19,6 +19,9 @@ from matplotlib.colors import LinearSegmentedColormap, LogNorm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy.interpolate import make_interp_spline
 from scipy.stats import binned_statistic, pearsonr
+from dotmap import DotMap
+from src.datamodules.physics import Mom4Vec
+import h5py
 
 # Some defaults for my plots to make them look nicer
 plt.rcParams["xaxis.labellocation"] = "right"
@@ -30,6 +33,13 @@ plt.rcParams["axes.labelsize"] = "large"
 plt.rcParams["axes.titlesize"] = "large"
 plt.rcParams["legend.fontsize"] = 11
 
+def get_neutrino_data(file_data, model_file, nneutr):
+    
+    for i in range(nneutr):
+        nutruth[f"nu_{i}"] = file_data["nu"]["p4"].neutrinos.mom[:, None, i, :]
+        nuflow[f"nu_{i}"] = model_file["nu"]["p4"].neutrinos.mom[:, None, i, :]
+    # Combine the two neutrino types into a single list
+    return nuflow, nutruth
 
 def add_arrows_outside_lims(
     bin_edges: list,

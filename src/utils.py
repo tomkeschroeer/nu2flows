@@ -46,11 +46,12 @@ def read_dilepton_file(file_path: Path, require_tops: bool = False) -> DotMap:
             file_data[key].to_cartesian()
 
     # Get the pairing between the lepton and the jets
-    lep_jet, antilep_jet = get_lj_pairing(
-        file_data.leptons, file_data.jets, is_b=file_data.jets.oth
-    )
-    file_data.lep_jet = lep_jet
-    file_data.antilep_jet = antilep_jet
+    if file_data.leptons.shape[-2] == 2:
+        lep_jet, antilep_jet = get_lj_pairing(
+            file_data.leptons, file_data.jets, is_b=file_data.jets.oth
+        )
+        file_data.lep_jet = lep_jet
+        file_data.antilep_jet = antilep_jet
     # Count the number of b quarks matched to the jets in the data
     # has_b = (file_data.jets_indices == 0).sum(axis=-1).astype("bool")
     # has_bbar = (file_data.jets_indices == 1).sum(axis=-1).astype("bool")
@@ -72,6 +73,7 @@ def argmin_last_N_axes(A, N):
 def get_lj_pairing(leptons: Mom4Vec, jets: Mom4Vec, is_b: Mom4Vec) -> np.ndarray:
     # Calculate all possible lj delta R values
     leptons = deepcopy(leptons)
+    print(leptons)
     jets = deepcopy(jets)
     leptons.mom = np.expand_dims(leptons.mom, 1)
     jets.mom = np.expand_dims(jets.mom, 2)
