@@ -3,9 +3,11 @@ import torch as T
 from torch.nn import ModuleList
 
 class CombinedModel(pl.LightningModule):
-    def __init__(self, model_1nu, model_2nu, model_3nu, model_4nu) -> None:
+    def __init__(self, models) -> None:
         super().__init__()
-        self.models = ModuleList([model_1nu, model_2nu, model_3nu, model_4nu])
+        self.models = ModuleList()
+        for model in models:
+            self.models.append(model)
 
     def predict_step(self, batch: tuple, _batch_idx: int) -> None:
         """Single prediction step which add generates samples to the buffer."""
@@ -18,7 +20,7 @@ class CombinedModel(pl.LightningModule):
         # print(lep[4])
         gen_nus = {}
         log_probs = {}
-        for length in range(1, 5):
+        for length in range(1, len(self.models)+1):
             print(f"length = {length}")
             lep_mask = T.any(lep != 0, dim=-1)
             mask = (lep_mask.sum(axis=1) == length)
