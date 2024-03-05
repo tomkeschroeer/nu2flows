@@ -89,7 +89,7 @@ class H5Dataset(Dataset):
                 self.jet_vars = ['pt', 'eta', 'phi', 'energy', 'is_tagged']
                 self.met.append(rf.structured_to_unstructured(table["MET"][:npf][self.decay_channel_mask]))
                 # self.lep.append(rf.structured_to_unstructured(table["leptons"][:npf][self.decay_channel_mask]))
-                self.jet.append(rf.structured_to_unstructured(table["jets"][*self.jet_vars][:npf][self.decay_channel_mask]))
+                self.jet.append(rf.structured_to_unstructured(table["jets"][:npf][self.decay_channel_mask]))
                 self.nu.append(rf.structured_to_unstructured(table["neutralinos"][:npf][self.decay_channel_mask]))
                 self.met_vars = table["MET"].dtype.names
                 # self.lep_vars = table["leptons"].dtype.names

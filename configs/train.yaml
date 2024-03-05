@@ -12,8 +12,8 @@ defaults:
   - callbacks: default.yaml
 
 seed: 12345 # For reproducibility
-project_name: nu2flows_models # Determines output directory path and wandb project
-network_name: example_model_test # Used for both saving and wandb
+project_name: stops_nu2flows # Determines output directory path and wandb project
+network_name: stop_models # Used for both saving and wandb
 ckpt_path: null # Checkpoint path to resume training
 precision: medium # Can set to medium to improve speed on ampere GPUs
 
