@@ -17,8 +17,8 @@ from src.utils import read_dilepton_file
 
 # Paths to the relevant files
 data_file = "/srv/beegfs/scratch/groups/rodem/ttbar_evt_reco/data_share/20231201_distop_m600_chichi_m300_ttbar_allhad_semilep_10M/hdf5/events_selected_3311.h5"
-model_file = root / "stops_nu2flows_small/stop_models_small/outputs/events_selected_3311.h5"
-plot_dir = root / "stops_nu2flows_small/stop_models_small/outputs/plots"
+model_file = root / "stops_nu2flows_small_rename/stop_models_small_rename/outputs/events_selected_3311.h5"
+plot_dir = root / "stops_nu2flows_small_rename/stop_models_small_rename/outputs/plots"
 
 # Load the event data from the file
 file_data = read_dilepton_file(Path(data_file))
@@ -32,17 +32,18 @@ nuflow = DotMap(
     }
 )
 with h5py.File(model_file, "r") as f:
-    data = f["gen_nu"][:, :1]
-    nuflow.nu_1 = Mom4Vec(data[:, :, 0])
-    nuflow.nu_2 = Mom4Vec(data[:, :, 1])
+    data_neutrino = f["neutralino_1"][:, :1]
+    data_antineutrino = f["neutralino_2"][:, :1]
+    nuflow.nu_1 = Mom4Vec(data_neutrino[:])
+    nuflow.nu_2 = Mom4Vec(data_antineutrino[:])
 
 # Define the truth neutrino as a dict and load from the file
 nutruth = DotMap(
     {
         "name": "truth_nu",
         "label": r"$\nu$-Truth",
-        "nu_1": Mom4Vec(file_data.neutrinos.mom[:, None, 0, :]),
-        "nu_2": Mom4Vec(file_data.neutrinos.mom[:, None, 1, :]),
+        "nu_1": Mom4Vec(file_data.neutralinos.mom[:, None, 0, :]),
+        "nu_2": Mom4Vec(file_data.neutralinos.mom[:, None, 1, :]),
         "hist_kwargs": {"color": "grey", "fill": True, "alpha": 0.5},
         "err_kwargs": {"color": "grey", "hatch": "///"},
     }
@@ -60,7 +61,8 @@ plot_multi_hists_2(
     data_labels=[n.label for n in neutrino_list],
     col_labels="Energy [MeV]",
     path=plot_dir / "energy_nu1.png",
-    bins=np.linspace(10000, 1000000, 30),
+    bins=np.linspace(0, 2000, 30),
+    # bins=np.linspace(0, 5, 30),
     do_err=True,
     hist_kwargs=[n.hist_kwargs for n in neutrino_list],
     err_kwargs=[n.err_kwargs for n in neutrino_list],
@@ -71,7 +73,80 @@ plot_multi_hists_2(
     data_labels=[n.label for n in neutrino_list],
     col_labels="Energy [MeV]",
     path=plot_dir / "energy_nu2.png",
-    bins=np.linspace(10000, 1000000, 30),
+    bins=np.linspace(0, 2000, 30),
+    # bins=np.linspace(0, 5, 30),
+    do_err=True,
+    hist_kwargs=[n.hist_kwargs for n in neutrino_list],
+    err_kwargs=[n.err_kwargs for n in neutrino_list],
+)
+
+plot_multi_hists_2(
+    data_list=[n.nu_1.px for n in neutrino_list],
+    data_labels=[n.label for n in neutrino_list],
+    col_labels="$p_x$ [MeV]",
+    path=plot_dir / "px_nu1.png",
+    bins=np.linspace(0, 2000, 30),
+    # bins=np.linspace(0, 5, 30),
+    do_err=True,
+    hist_kwargs=[n.hist_kwargs for n in neutrino_list],
+    err_kwargs=[n.err_kwargs for n in neutrino_list],
+)
+
+plot_multi_hists_2(
+    data_list=[n.nu_2.px for n in neutrino_list],
+    data_labels=[n.label for n in neutrino_list],
+    col_labels="$p_x$ [MeV]",
+    path=plot_dir / "px_nu2.png",
+    bins=np.linspace(0, 1000, 30),
+    # bins=np.linspace(0, 5, 30),
+    do_err=True,
+    hist_kwargs=[n.hist_kwargs for n in neutrino_list],
+    err_kwargs=[n.err_kwargs for n in neutrino_list],
+)
+
+plot_multi_hists_2(
+    data_list=[n.nu_1.py for n in neutrino_list],
+    data_labels=[n.label for n in neutrino_list],
+    col_labels="$p_y$ [MeV]",
+    path=plot_dir / "py_nu1.png",
+    bins=np.linspace(0, 1000, 30),
+    # bins=np.linspace(0, 5, 30),
+    do_err=True,
+    hist_kwargs=[n.hist_kwargs for n in neutrino_list],
+    err_kwargs=[n.err_kwargs for n in neutrino_list],
+)
+
+plot_multi_hists_2(
+    data_list=[n.nu_2.py for n in neutrino_list],
+    data_labels=[n.label for n in neutrino_list],
+    col_labels="$p_y$ [MeV]",
+    path=plot_dir / "py_nu2.png",
+    bins=np.linspace(0, 1000, 30),
+    # bins=np.linspace(0, 5, 30),
+    do_err=True,
+    hist_kwargs=[n.hist_kwargs for n in neutrino_list],
+    err_kwargs=[n.err_kwargs for n in neutrino_list],
+)
+
+plot_multi_hists_2(
+    data_list=[n.nu_1.pz for n in neutrino_list],
+    data_labels=[n.label for n in neutrino_list],
+    col_labels="$p_z$ [MeV]",
+    path=plot_dir / "pz_nu1.png",
+    bins=np.linspace(0, 1000, 30),
+    # bins=np.linspace(0, 5, 30),
+    do_err=True,
+    hist_kwargs=[n.hist_kwargs for n in neutrino_list],
+    err_kwargs=[n.err_kwargs for n in neutrino_list],
+)
+
+plot_multi_hists_2(
+    data_list=[n.nu_2.pz for n in neutrino_list],
+    data_labels=[n.label for n in neutrino_list],
+    col_labels="$p_z$ [MeV]",
+    path=plot_dir / "pz_nu2.png",
+    bins=np.linspace(0, 1000, 30),
+    # bins=np.linspace(0, 5, 30),
     do_err=True,
     hist_kwargs=[n.hist_kwargs for n in neutrino_list],
     err_kwargs=[n.err_kwargs for n in neutrino_list],

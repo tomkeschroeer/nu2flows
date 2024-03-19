@@ -140,7 +140,7 @@ class H5Dataset(Dataset):
             # "leptons": self.lep[idx],
             "jets": (self.jet[idx], self.jet_mask[idx]),
         }
-        targets = {"neutrino": self.nu[idx][0], "antineutrino": self.nu[idx][1]}
+        targets = {"neutralino_1": self.nu[idx][0], "neutralino_2": self.nu[idx][1]}
         return inputs, targets
 
     def get_input_dims(self) -> tuple:
