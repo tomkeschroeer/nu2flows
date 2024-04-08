@@ -12,7 +12,7 @@ defaults:
   - callbacks: default.yaml
 
 seed: 12345 # For reproducibility
-project_name: stops_nu2flows # Determines output directory path and wandb project
+project_name: stops_nu2flows_rename # Determines output directory path and wandb project
 network_name: stop_models # Used for both saving and wandb
 ckpt_path: null # Checkpoint path to resume training
 precision: medium # Can set to medium to improve speed on ampere GPUs

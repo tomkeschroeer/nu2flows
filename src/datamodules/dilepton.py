@@ -28,7 +28,7 @@ class H5Dataset(Dataset):
         met_kins: str | list = "px,py",
         # lep_kins: str | list = "px,py,pz,log_energy",
         jet_kins: str | list = "px,py,pz,log_energy",
-        nu_kins: str | list = "px,py,pz",
+        nu_kins: str | list = "px,py,pz,log_energy",
     ) -> None:
         """
         Parameters

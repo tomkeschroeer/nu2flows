@@ -321,7 +321,9 @@ def change_from_ptetaphiE(
             "pt",
             "log_pt",
             "energy",
+            "energy_from_m",
             "log_energy",
+            "log_energy_from_m",
             "phi",
             "cos",
             "sin",
@@ -339,20 +341,22 @@ def change_from_ptetaphiE(
     pt = data[..., 0:1]
     eta = data[..., 1:2] if n_dim > 2 else empty_0dim_like(data)
     phi = data[..., 2:3] if n_dim > 2 else data[..., 1:2]
-    eng = data[..., 3:4] if n_dim > 3 else empty_0dim_like(data)
+    eng_or_m = data[..., 3:4] if n_dim > 3 else empty_0dim_like(data)
     oth = data[..., n_dim:]
 
     # If energy is empty then we might try use pt and eta
-    if eng.shape[-1] == 0 and eta.shape[-1] > 0:
-        eng = pt * np.cosh(eta)
+    if eng_or_m.shape[-1] == 0 and eta.shape[-1] > 0:
+        eng_or_m = pt * np.cosh(eta)
 
     # A dictionary for calculating the supported new variables
     # Using lambda functions like this prevents execution every time
     new_coord_fns = {
         "pt": lambda: pt,
         "log_pt": lambda: np.log(pt + 1e-8),
-        "energy": lambda: eng,
-        "log_energy": lambda: np.log(eng + 1e-8),
+        "energy": lambda: eng_or_m,
+        "energy_from_m": lambda: np.sqrt((pt * np.cosh(eta))**2 + eng_or_m**2),
+        "log_energy": lambda: np.log(eng_or_m + 1e-8),
+        "log_energy_from_m": lambda: 0.5*np.log((pt * np.cosh(eta))**2 + eng_or_m**2 + 1e-8),
         "phi": lambda: phi,
         "cos": lambda: np.cos(phi),
         "sin": lambda: np.sin(phi),

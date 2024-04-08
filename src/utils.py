@@ -14,7 +14,7 @@ from dotmap import DotMap
 from src.datamodules.physics import Mom4Vec, delR
 
 
-def read_dilepton_file(file_path: Path, require_tops: bool = False) -> DotMap:
+def read_dilepton_file(file_path: Path, require_tops: bool = False, hadr: bool = True) -> DotMap:
     """Reads in data from an HDF file, returning the collection of information as a
     DotMap object."""
 
@@ -22,11 +22,16 @@ def read_dilepton_file(file_path: Path, require_tops: bool = False) -> DotMap:
     file_data = DotMap()
     with h5py.File(file_path, "r") as f:
         table = f["delphes"]
+        if hadr:
+            decay_channel = table["decay_channel"][:]
+            mask = decay_channel == 0
+        else:
+            mask = ...
         for key in table.keys():
             try:
-                file_data[key] = rf.structured_to_unstructured(table[key][:])
+                file_data[key] = rf.structured_to_unstructured(table[key][:][mask])
             except Exception:
-                file_data[key] = table[key][:]
+                file_data[key] = table[key][:][mask]
 
             # Neutrinos has superfluous PDGID at the front which must be removed
             # They also don't have energy!
